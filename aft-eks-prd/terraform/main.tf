@@ -16,8 +16,9 @@ provider "helm" {
   }
 }
 
+
 ################################################################################
-# Cluster
+# EKS Cluster
 ################################################################################
 
 module "eks" {
@@ -46,6 +47,29 @@ module "eks" {
     }
   }
 
+  manage_aws_auth_configmap = true
+  aws_auth_roles = flatten([
+    module.eks_blueprints_admin_team.aws_auth_configmap_role
+  ])
+
+  tags = local.tags
+}
+
+
+################################################################################
+# EKS Blueprints Teams
+################################################################################
+
+module "eks_blueprints_admin_team" {
+  source = "git::https://github.com/aws-ia/terraform-aws-eks-blueprints-teams.git?ref=e039ac2fbcc25f8990965cc298f97208e573e74c"
+
+  name = "admin-team"
+
+  # Enables elevated, admin privileges for this team
+  enable_admin = true
+  users        = [data.aws_ssm_parameter.admin_team_arn.value]
+  cluster_arn  = module.eks.cluster_arn
+
   tags = local.tags
 }
 
@@ -64,7 +88,6 @@ module "eks_blueprints_addons" {
   enable_aws_load_balancer_controller = true
   enable_kube_prometheus_stack        = true
   enable_metrics_server               = true
-  enable_external_dns                 = true
   enable_cert_manager                 = true
 
   tags = local.tags
@@ -72,7 +95,7 @@ module "eks_blueprints_addons" {
 }
 
 ################################################################################
-# Supporting Resources
+# Supporting Resources 
 ################################################################################
 
 module "vpc" {
