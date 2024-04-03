@@ -18,6 +18,23 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
+  enable_cluster_creator_admin_permissions = true
+  access_entries = {
+    admin-team = {
+      kubernetes_groups = []
+      principal_arn     = data.aws_ssm_parameter.admin_team_arn.value
+
+      policy_associations = {
+        example = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type       = "cluster"
+          }
+        }
+      }
+    }
+  }
+
   eks_managed_node_groups = {
     initial = {
       instance_types = ["m5.large"]
@@ -27,16 +44,4 @@ module "eks" {
       desired_size = 2
     }
   }
-}
-
-module "aws_auth" {
-  source  = "terraform-aws-modules/eks/aws//modules/aws-auth"
-  version = "~> 20.0"
-
-  manage_aws_auth_configmap = true
-  aws_auth_roles = flatten([
-    module.eks_blueprints_admin_team.aws_auth_configmap_role
-  ])
-
-  tags = local.tags
 }
