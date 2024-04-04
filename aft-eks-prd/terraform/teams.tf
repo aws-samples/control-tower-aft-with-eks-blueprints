@@ -1,17 +1,38 @@
 ################################################################################
 # EKS Blueprints Teams
 ################################################################################
+module "development_team" {
+  source  = "aws-ia/eks-blueprints-teams/aws"
+  version = "~> 1.1.0"
 
-# module "eks_blueprints_admin_team" {
-#   source  = "aws-ia/eks-blueprints-teams/aws"
-#   version = "~> 1.0"
+  name = "development-team"
 
-#   name = "admin-team"
+  cluster_arn       = module.eks.cluster_arn
+  oidc_provider_arn = module.eks.oidc_provider_arn
 
-#   # Enables elevated, admin privileges for this team
-#   enable_admin = true
-#   users        = [data.aws_ssm_parameter.admin_team_arn.value]
-#   cluster_arn  = module.eks.cluster_arn
+  users = [""]
 
-#   tags = local.tags
-# }
+  labels = {
+    team = "development"
+  }
+
+  annotations = {
+    team = "development"
+  }
+
+  namespaces = {
+    default = {
+      create = false
+    }
+
+    app01 = {
+      labels = {
+        projectName = "app01",
+      }
+    }
+  }
+
+  tags = {
+    Environment = "PRODUCTION"
+  }
+}

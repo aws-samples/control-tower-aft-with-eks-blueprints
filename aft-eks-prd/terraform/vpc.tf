@@ -2,7 +2,8 @@
 # AWS VPC
 ################################################################################
 module "vpc" {
-  source = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=acadfc42ba1ec23404eec03b69603a2cc52679b1"
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
 
   name = local.name
   cidr = local.vpc_cidr
