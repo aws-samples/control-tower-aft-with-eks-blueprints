@@ -1,4 +1,28 @@
 ################################################################################
+# EKS Required Providers
+################################################################################
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+  token                  = data.aws_eks_cluster_auth.this.token
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    token                  = data.aws_eks_cluster_auth.this.token
+  }
+}
+
+################################################################################
+# EKS Cluster dependencies
+################################################################################
+data "aws_eks_cluster_auth" "this" {
+  name = module.eks.cluster_name
+}
+
+################################################################################
 # EKS Cluster
 ################################################################################
 module "eks" {
@@ -20,7 +44,7 @@ module "eks" {
 
   enable_cluster_creator_admin_permissions = true
   access_entries = {
-    admin-team = {
+    platform-team = {
       kubernetes_groups = []
       principal_arn     = data.aws_ssm_parameter.admin_team_arn.value
 

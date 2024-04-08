@@ -10,7 +10,7 @@ module "development_team" {
   cluster_arn       = module.eks.cluster_arn
   oidc_provider_arn = module.eks.oidc_provider_arn
 
-  users = [""]
+  users = [data.aws_ssm_parameter.dev_team_arn]
 
   labels = {
     team = "development"
