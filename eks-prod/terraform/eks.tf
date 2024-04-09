@@ -46,10 +46,10 @@ module "eks" {
   access_entries = {
     platform-team = {
       kubernetes_groups = []
-      principal_arn     = data.aws_ssm_parameter.admin_team_arn.value
+      principal_arn     = try(data.aws_ssm_parameter.platform_team_arn[0].value, data.aws_iam_roles.platform_team.arns)
 
       policy_associations = {
-        example = {
+        cluster_admin = {
           policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
           access_scope = {
             type = "cluster"
